@@ -1,0 +1,13 @@
+{
+    "canisters": {
+        "azle_crud": {
+            "type": "custom",
+            "build": "npx azle azle_crud",
+            "root": "src",
+            "ts": "src/index.ts",
+            "candid": "src/index.did",
+            "wasm": ".azle/azle_crud/azle_crud.wasm.gz"
+        }
+    }
+}
+
