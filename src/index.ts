@@ -1,18 +1,66 @@
-import { $query, $update } from 'azle';
+import { Opt, $query, Record, $update, Vec } from 'azle';
 
-// This is a global variable that is stored on the heap
-let message: string = '';
+type User = Record<{
+    id: string;
+    username: string;
+    deleted: boolean;
+}>;
 
-// Query calls complete quickly because they do not go through consensus
+type Db = {
+    users: {
+        [id: string]: User;
+    };
+};
+
+let db: Db = {
+    users: {}
+};
+
 $query;
-export function getMessage(): string {
-    return message;
+export function getUserById(id: string): Opt<User> {
+    const userOrUndefined = db.users[id];
+
+    if (!userOrUndefined || userOrUndefined.deleted) return Opt.None
+
+    return Opt.Some(userOrUndefined);
 }
 
-// Update calls take a few seconds to complete
-// This is because they persist state changes and go through consensus
+$query;
+export function getAllUsers(): Vec<User> {
+    const temp = Object.values(db.users).filter((e: any) => !e.deleted)
+    return temp;
+}
+
 $update;
-export function setMessage(newMessage: string): void {
-    message = newMessage; // This change will be persisted
+export function createUser(username: string): User {
+    const id = Object.keys(db.users).length.toString();
+
+    const user = {
+        id,
+        username,
+        deleted: false
+    };
+
+    db.users[id] = user;
+
+    return user;
 }
 
+$update;
+export function updateUserById(id: string, username: string): Opt<User> {
+    const user = db.users[id];
+
+    if (!user || user.deleted) return Opt.None;
+
+    user.username = username;
+    return Opt.Some(user)
+}
+
+$update;
+export function deleteUserById(id: string): Opt<User> {
+    const user = db.users[id];
+    if (!user || user.deleted) return Opt.None;
+
+    user.deleted = true;
+    return Opt.Some(user)
+}

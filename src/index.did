@@ -1,0 +1,8 @@
+type User = record { id : text; deleted : bool; username : text };
+service : () -> {
+  createUser : (text) -> (User);
+  deleteUserById : (text) -> (opt User);
+  getAllUsers : () -> (vec User) query;
+  getUserById : (text) -> (opt User) query;
+  updateUserById : (text, text) -> (opt User);
+}
